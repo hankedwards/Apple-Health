@@ -1,0 +1,17 @@
+# Apple Health private data
+apple_health.db
+*.db
+export.xml
+apple_health_export/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# PyCharm
+.idea/
+
+# OS files
+.DS_Store
