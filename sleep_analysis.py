@@ -102,6 +102,7 @@ def add_sleep_totals(summary):
     # df["sleep_stage"] = df["sleep_stage"].replace(stage_map)
     summary["total_sleep"] = 0.0
 
+
     for stage in sleep_stages:
         if stage in summary.columns:
             summary["total_sleep"] += summary[stage]
@@ -141,26 +142,72 @@ if __name__ == "__main__":
     print("Sample records:")
     print(sleep.tail(20).to_string(index=False))
 
-    nightly = create_nightly_summary(sleep)
+    # nightly = create_nightly_summary(sleep)
     # nightly = add_sleep_totals(nightly)
+    nightly = create_nightly_summary(sleep)
 
-    print()
-    print("Nightly Sleep Summary")
-    print("-" * 100)
+# Calculate total actual sleep
+    nightly["total_sleep"] = (
+     nightly["Core"]
+     + nightly["Deep"]
+     + nightly["REM"]
+    )
 
-    print(
+    nightly = create_nightly_summary(sleep)
+
+# Total sleep = Core + Deep + REM
+nightly["total_sleep"] = (
+    nightly["Core"]
+    + nightly["Deep"]
+    + nightly["REM"]
+)
+
+# Sort chronologically
+nightly = nightly.sort_values("sleep_date").copy()
+
+# Calculate 7-day moving average
+nightly["7_day_avg"] = (
+    nightly["total_sleep"]
+    .rolling(window=7, min_periods=1)
+    .mean()
+)
+
+# print()
+# print("Sleep Hours by Stage and Date")
+# print("=" * 80)
+
+display_columns = [
+    "sleep_date",
+    "Core",
+    "Deep",
+    "REM",
+    "Awake",
+    "total_sleep"
+]
+
+# print(
+#         nightly[display_columns]
+#      .round(2)
+#         .to_string(index=False)
+# )
+
+# print()
+# print("Nightly Sleep Summary")
+# print("-" * 100)
+
+print(
         nightly.tail(30).to_string(index=False)
     )
 
-    nightly.to_csv(
+nightly.to_csv(
         BASE_DIR / "sleep_nightly_summary.csv",
         index=False
     )
 
-    print()
-    print("Created sleep_nightly_summary.csv")
+# print()
+# print("Created sleep_nightly_summary.csv")
 
-    import plotly.express as px
+import plotly.express as px
 
 # Select the sleep-stage columns that actually exist
 stage_columns = [
@@ -217,9 +264,9 @@ nightly["7_day_avg"] = (
     .rolling(window=7, min_periods=1)
     .mean()
 )
-print()
-print("Sleep Hours by Stage and Date")
-print("=" * 80)
+# print()
+# print("Sleep Hours by Stage and Date")
+# print("=" * 80)
 
 # Select the columns we want to display
 display_columns = [
@@ -228,11 +275,11 @@ display_columns = [
 ]
 
 # Print with 2 decimal places
-print(
-    nightly[display_columns]
-    .round(2)
-    .to_string(index=False)
-)
+# print(
+#     nightly[display_columns]
+#     .round(2)
+#     .to_string(index=False)
+# )
 # Optional: only show the most recent 60 nights
 chart_data = nightly.tail(60).copy()
 
