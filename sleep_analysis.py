@@ -231,6 +231,11 @@ chart_data = chart_data.melt(
     value_name="Minutes"
 )
 
+chart_data["date"] = pd.to_datetime(chart_data["sleep_date"])
+
+chart_data = chart_data[
+    (chart_data["date"] > "2026-05-01")]
+
 # Create stacked bar chart
 fig = px.bar(
     chart_data,
@@ -274,14 +279,19 @@ display_columns = [
     if col in nightly.columns
 ]
 
-# Print with 2 decimal places
-# print(
-#     nightly[display_columns]
-#     .round(2)
-#     .to_string(index=False)
-# )
-# Optional: only show the most recent 60 nights
+
+#Optional: only show the most recent 60 nights
 chart_data = nightly.tail(60).copy()
+# chart_data = (chart_data["total_sleep"].notna() &
+#     chart_data)[chart_data["total_sleep"] > 0]
+
+chart_data = chart_data[chart_data["total_sleep"] != 0]
+#Print with 2 decimal places
+print(
+    chart_data[display_columns]
+    .round(2)
+    .to_string(index=False)
+)
 
 fig = px.line(
     chart_data,
